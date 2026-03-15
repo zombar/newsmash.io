@@ -216,11 +216,14 @@
           url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E")
           no-repeat center / 12px;
       }
+      .card--compact {
+        grid-row: span 1;
+      }
       .card--compact .card-title {
-        -webkit-line-clamp: 6;
+        -webkit-line-clamp: 2;
       }
       .card--compact .card-desc {
-        -webkit-line-clamp: 5;
+        display: none;
       }
 
       .card:hover {
