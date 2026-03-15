@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>newsmash</title>
+<title>NEWSMASH.IO</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
   --bg: #0d1117;
   --card: #161b22;
+  --reader-bg: #0d1117;
   --border: #30363d;
   --text: #e6edf3;
   --text-muted: #8b949e;
@@ -17,8 +18,7 @@
   --accent-hover: #79b8ff;
   --danger: #f85149;
   --success: #3fb950;
-  --overlay: rgba(0,0,0,0.75);
-  --radius: 10px;
+  --overlay: rgba(0,0,0,0.8);
   --header-h: 56px;
 }
 
@@ -47,12 +47,14 @@ body {
 }
 
 #logo {
-  font-size: 20px;
-  font-weight: 700;
+  font-family: Impact, 'Arial Narrow', Arial, sans-serif;
+  font-size: 22px;
+  font-weight: 400;
   color: var(--accent);
-  letter-spacing: -0.5px;
+  letter-spacing: 1px;
   white-space: nowrap;
   flex-shrink: 0;
+  text-transform: uppercase;
 }
 
 #filter-bar {
@@ -69,7 +71,7 @@ body {
 .chip {
   flex-shrink: 0;
   padding: 4px 12px;
-  border-radius: 20px;
+  border-radius: 0;
   border: 1px solid var(--border);
   background: var(--card);
   color: var(--text-muted);
@@ -100,7 +102,7 @@ body {
   background: var(--card);
   border: 1px solid var(--border);
   color: var(--text);
-  border-radius: 8px;
+  border-radius: 0;
   padding: 6px 10px;
   cursor: pointer;
   font-size: 16px;
@@ -115,9 +117,7 @@ body {
 .icon-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
 /* ── Grid ── */
-#main {
-  padding: 16px;
-}
+#main { padding: 16px; }
 
 #grid {
   display: grid;
@@ -129,7 +129,7 @@ body {
 .card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 0;
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
@@ -210,7 +210,7 @@ body {
 .skeleton {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 0;
   overflow: hidden;
 }
 
@@ -227,7 +227,7 @@ body {
 
 .skel-img { width: 100%; aspect-ratio: 16/9; }
 .skel-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-.skel-line { height: 12px; border-radius: 4px; }
+.skel-line { height: 12px; border-radius: 0; }
 .skel-line.short { width: 60%; }
 .skel-line.medium { width: 85%; }
 .skel-line.long { width: 100%; }
@@ -242,7 +242,7 @@ body {
 }
 #empty-state h2 { font-size: 20px; margin-bottom: 8px; color: var(--text); }
 
-/* ── Preview Modal ── */
+/* ── Article Modal ── */
 #modal-overlay {
   display: none;
   position: fixed;
@@ -258,18 +258,30 @@ body {
 #modal {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  max-width: 680px;
-  width: 100%;
-  max-height: 90vh;
+  border-radius: 0;
+  width: 92vw;
+  max-width: 1300px;
+  height: 88vh;
+  display: flex;
+  overflow: hidden;
+  animation: modal-in 0.2s ease;
+}
+
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.97) translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Left pane */
+#modal-left {
+  width: 360px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
-  animation: modal-in 0.2s ease;
-}
-@keyframes modal-in {
-  from { opacity: 0; transform: scale(0.95) translateY(8px); }
-  to   { opacity: 1; transform: none; }
 }
 
 #modal-img {
@@ -277,6 +289,7 @@ body {
   aspect-ratio: 16/9;
   object-fit: cover;
   display: block;
+  flex-shrink: 0;
 }
 #modal-placeholder {
   width: 100%;
@@ -287,10 +300,15 @@ body {
   font-size: 72px;
   font-weight: 700;
   color: rgba(255,255,255,0.3);
+  flex-shrink: 0;
 }
 
 #modal-body {
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
 }
 
 #modal-meta {
@@ -299,37 +317,171 @@ body {
   gap: 8px;
   font-size: 12px;
   color: var(--text-muted);
-  margin-bottom: 12px;
 }
 
 #modal-title {
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 700;
   line-height: 1.35;
-  margin-bottom: 12px;
 }
 
 #modal-desc {
   color: var(--text-muted);
   line-height: 1.7;
-  margin-bottom: 20px;
-  font-size: 14px;
+  font-size: 13px;
+  flex: 1;
 }
-#modal-desc a { color: var(--accent); }
 
 #modal-actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 4px;
 }
 
+/* Right pane */
+#modal-right {
+  flex: 1;
+  background: var(--reader-bg);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  position: relative;
+}
+
+#reader-toolbar {
+  position: sticky;
+  top: 0;
+  background: rgba(13,17,23,0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  z-index: 10;
+}
+
+#reader-toolbar-title {
+  font-size: 12px;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+#reader-close {
+  flex-shrink: 0;
+}
+
+#article-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  gap: 12px;
+  color: var(--text-muted);
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+#article-content {
+  padding: 32px 40px;
+  max-width: 760px;
+  margin: 0 auto;
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--text);
+}
+
+#article-content h1, #article-content h2, #article-content h3,
+#article-content h4, #article-content h5 {
+  color: var(--text);
+  line-height: 1.3;
+  margin: 1.4em 0 0.5em;
+  font-weight: 700;
+}
+#article-content h1 { font-size: 1.6em; }
+#article-content h2 { font-size: 1.3em; }
+#article-content h3 { font-size: 1.1em; }
+
+#article-content p { margin: 0 0 1em; }
+#article-content p:last-child { margin-bottom: 0; }
+
+#article-content a {
+  color: var(--accent);
+  text-decoration: none;
+}
+#article-content a:hover { text-decoration: underline; }
+
+#article-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em auto;
+  border: 1px solid var(--border);
+}
+
+#article-content blockquote {
+  border-left: 3px solid var(--accent);
+  margin: 1em 0;
+  padding: 8px 16px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+#article-content pre, #article-content code {
+  background: #0d1117;
+  border: 1px solid var(--border);
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-size: 13px;
+}
+#article-content pre { padding: 12px 16px; overflow-x: auto; margin: 1em 0; }
+#article-content code { padding: 2px 5px; }
+#article-content pre code { padding: 0; border: none; background: none; }
+
+#article-content ul, #article-content ol {
+  margin: 0 0 1em 1.5em;
+}
+#article-content li { margin-bottom: 0.3em; }
+
+#article-content figure { margin: 1.5em 0; text-align: center; }
+#article-content figcaption { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+#article-content hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2em 0;
+}
+
+#article-error {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted);
+}
+#article-error p { margin-bottom: 16px; }
+
+/* Buttons */
 .btn {
-  padding: 8px 18px;
-  border-radius: 8px;
+  padding: 8px 16px;
+  border-radius: 0;
   border: 1px solid var(--border);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   transition: all 0.15s;
+  text-decoration: none;
+  display: inline-block;
 }
 .btn-primary {
   background: var(--accent);
@@ -407,7 +559,7 @@ body {
   padding: 10px 12px;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 0;
   margin-bottom: 8px;
 }
 
@@ -453,7 +605,7 @@ body {
   color: var(--text-muted);
   cursor: pointer;
   padding: 4px;
-  border-radius: 4px;
+  border-radius: 0;
   transition: color 0.15s;
   line-height: 1;
   font-size: 16px;
@@ -469,7 +621,7 @@ body {
 .input {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 0;
   color: var(--text);
   padding: 8px 12px;
   font-size: 13px;
@@ -498,7 +650,7 @@ select.input {
 }
 #interval-row label { font-size: 13px; white-space: nowrap; }
 
-/* ── Notification toast ── */
+/* ── Toast ── */
 #toast {
   position: fixed;
   bottom: 20px;
@@ -506,7 +658,7 @@ select.input {
   transform: translateX(-50%) translateY(80px);
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 0;
   padding: 10px 20px;
   font-size: 13px;
   z-index: 500;
@@ -517,10 +669,32 @@ select.input {
 #toast.error { border-color: var(--danger); color: var(--danger); }
 #toast.success { border-color: var(--success); color: var(--success); }
 
+/* ── Animations ── */
+@keyframes spin { to { transform: rotate(360deg); } }
+
 /* ── Responsive ── */
+@media (max-width: 768px) {
+  #modal {
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+  }
+  #modal-overlay { padding: 0; }
+  #modal-left {
+    width: 100%;
+    flex-shrink: 0;
+    max-height: 45vh;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  #modal-right { min-height: 0; flex: 1; }
+  #article-content { padding: 20px; }
+}
+
 @media (max-width: 600px) {
   #grid { grid-template-columns: 1fr; }
-  #logo { font-size: 16px; }
+  #logo { font-size: 18px; }
   #refresh-countdown { display: none; }
   #settings-drawer { width: 100vw; }
 }
@@ -529,7 +703,7 @@ select.input {
 <body>
 
 <header id="header">
-  <div id="logo">newsmash</div>
+  <div id="logo">NEWSMASH.IO</div>
   <div id="filter-bar"></div>
   <div id="header-right">
     <span id="refresh-countdown"></span>
@@ -546,17 +720,38 @@ select.input {
   <div id="grid"></div>
 </main>
 
-<!-- Preview Modal -->
+<!-- Article Modal (dual column) -->
 <div id="modal-overlay">
   <div id="modal">
-    <div id="modal-img-wrap"></div>
-    <div id="modal-body">
-      <div id="modal-meta"></div>
-      <div id="modal-title"></div>
-      <div id="modal-desc"></div>
-      <div id="modal-actions">
-        <a id="modal-link" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Read Full Article →</a>
-        <button class="btn btn-secondary" onclick="closePreview()">Close</button>
+    <!-- Left: image + meta + excerpt -->
+    <div id="modal-left">
+      <div id="modal-img-wrap"></div>
+      <div id="modal-body">
+        <div id="modal-meta"></div>
+        <div id="modal-title"></div>
+        <div id="modal-desc"></div>
+        <div id="modal-actions">
+          <a id="modal-link" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Open Original ↗</a>
+          <button class="btn btn-secondary" onclick="closePreview()">Close</button>
+        </div>
+      </div>
+    </div>
+    <!-- Right: in-app reader -->
+    <div id="modal-right">
+      <div id="reader-toolbar">
+        <span id="reader-toolbar-title">Loading article…</span>
+        <button class="icon-btn" id="reader-close" onclick="closePreview()" title="Close (Esc)">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div id="article-loading">
+        <div class="spinner"></div>
+        <span>Fetching article…</span>
+      </div>
+      <div id="article-content" style="display:none"></div>
+      <div id="article-error" style="display:none">
+        <p>Could not load article content.</p>
+        <a id="article-fallback-link" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Open in Browser ↗</a>
       </div>
     </div>
   </div>
@@ -689,10 +884,9 @@ async function fetchFeed(source) {
   return parseRSS(text, source);
 }
 
-function extractImages(item, ns) {
+function extractImages(item) {
   const images = [];
 
-  // media:content / media:thumbnail
   const mediaEls = [
     ...Array.from(item.getElementsByTagNameNS('http://search.yahoo.com/mrss/', 'content')),
     ...Array.from(item.getElementsByTagNameNS('http://search.yahoo.com/mrss/', 'thumbnail')),
@@ -707,7 +901,6 @@ function extractImages(item, ns) {
     }
   }
 
-  // enclosure
   const enc = item.querySelector('enclosure');
   if (enc) {
     const type = enc.getAttribute('type') || '';
@@ -717,7 +910,6 @@ function extractImages(item, ns) {
     }
   }
 
-  // img inside description / content:encoded
   const descEl =
     item.querySelector('description') ||
     item.getElementsByTagNameNS('http://purl.org/rss/1.0/modules/content/', 'encoded')[0] ||
@@ -729,16 +921,12 @@ function extractImages(item, ns) {
     const html = descEl.textContent || descEl.innerHTML || '';
     const imgMatches = html.matchAll(/src=["']([^"']+\.(jpe?g|png|gif|webp)[^"']*)["']/gi);
     for (const m of imgMatches) {
-      if (m[1] && !m[1].includes('data:')) {
-        images.push({ url: m[1], width: 0 });
-      }
+      if (m[1] && !m[1].includes('data:')) images.push({ url: m[1], width: 0 });
     }
-    // Also try <![CDATA[...]]> pattern
     const cdataMatches = html.matchAll(/<img[^>]+src=["']([^"']+)["']/gi);
     for (const m of cdataMatches) {
-      if (m[1] && !m[1].includes('data:') && !images.find(i => i.url === m[1])) {
+      if (m[1] && !m[1].includes('data:') && !images.find(i => i.url === m[1]))
         images.push({ url: m[1], width: 0 });
-      }
     }
   }
 
@@ -754,12 +942,8 @@ function getBestImage(images) {
 
 function getTextContent(item, ...tagNames) {
   for (const tag of tagNames) {
-    const el = item.querySelector(tag) ||
-               item.getElementsByTagNameNS('*', tag)[0];
-    if (el) {
-      const text = el.textContent || '';
-      return text.trim();
-    }
+    const el = item.querySelector(tag) || item.getElementsByTagNameNS('*', tag)[0];
+    if (el) return (el.textContent || '').trim();
   }
   return '';
 }
@@ -773,11 +957,8 @@ function stripHtml(html) {
 function parseRSS(xmlText, source) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(xmlText, 'text/xml');
+  if (doc.querySelector('parsererror')) throw new Error('XML parse error');
 
-  const parseError = doc.querySelector('parsererror');
-  if (parseError) throw new Error('XML parse error');
-
-  // Atom or RSS?
   const isAtom = !!doc.querySelector('feed');
   const items = isAtom
     ? Array.from(doc.querySelectorAll('entry'))
@@ -801,7 +982,7 @@ function parseRSS(xmlText, source) {
 
     const images = extractImages(item);
     const image = getBestImage(images);
-    const descText = stripHtml(description).slice(0, 400);
+    const descText = stripHtml(description).slice(0, 500);
     const date = pubDate ? new Date(pubDate) : new Date(0);
 
     return {
@@ -838,34 +1019,26 @@ async function fetchAll() {
   const articles = [];
   let errCount = 0;
   results.forEach((r, i) => {
-    if (r.status === 'fulfilled') {
-      articles.push(...r.value);
-    } else {
+    if (r.status === 'fulfilled') articles.push(...r.value);
+    else {
       errCount++;
       console.warn(`Feed error [${enabledSources[i].name}]:`, r.reason);
     }
   });
 
-  if (errCount > 0 && articles.length === 0) {
-    showToast(`Failed to load ${errCount} feed(s). Check your connection.`, 'error');
-  } else if (errCount > 0) {
-    showToast(`${errCount} feed(s) failed to load`, 'error');
-  }
+  if (errCount > 0 && articles.length === 0) showToast(`Failed to load ${errCount} feed(s).`, 'error');
+  else if (errCount > 0) showToast(`${errCount} feed(s) failed to load`, 'error');
 
-  // Deduplicate by id (url)
   const seen = new Set();
   const unique = articles.filter(a => {
     if (seen.has(a.id)) return false;
     seen.add(a.id);
     return true;
   });
-
-  // Sort newest first
   unique.sort((a,b) => b.date - a.date);
 
   state.articles = unique;
   cacheArticles(unique);
-
   state.loading = false;
   updateRefreshBtn(false);
   renderGrid();
@@ -882,8 +1055,7 @@ function timeAgo(date) {
   if (mins < 60) return `${mins}m ago`;
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
 }
 
 // ── Rendering ──
@@ -895,7 +1067,6 @@ function filteredArticles() {
 function renderGrid() {
   const grid = document.getElementById('grid');
   const articles = filteredArticles();
-
   if (!articles.length) {
     grid.innerHTML = `<div id="empty-state">
       <h2>No articles yet</h2>
@@ -903,7 +1074,6 @@ function renderGrid() {
     </div>`;
     return;
   }
-
   grid.innerHTML = articles.map(renderCard).join('');
 }
 
@@ -947,7 +1117,6 @@ function showSkeletons(count) {
 function renderSourceFilters() {
   const bar = document.getElementById('filter-bar');
   const enabled = state.sources.filter(s => s.enabled);
-
   const chips = [
     `<button class="chip ${state.activeFilter === 'all' ? 'active' : ''}" onclick="setFilter('all')">All</button>`,
     ...enabled.map(s =>
@@ -963,7 +1132,104 @@ function setFilter(id) {
   renderGrid();
 }
 
-// ── Preview ──
+// ── Article Content Fetching ──
+async function fetchArticleContent(url) {
+  const proxyUrl = CORS_PROXY + encodeURIComponent(url);
+  const res = await fetch(proxyUrl, { signal: AbortSignal.timeout(15000) });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const html = await res.text();
+  return extractArticleContent(html, url);
+}
+
+function extractArticleContent(html, baseUrl) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+
+  // Remove noise
+  const noiseSelectors = [
+    'script','style','noscript','iframe','form',
+    'nav','header','footer','aside',
+    '[class*="sidebar"]','[class*="related"]','[class*="recommend"]',
+    '[class*="newsletter"]','[class*="subscribe"]','[class*="cookie"]',
+    '[class*="social"]','[class*="share"]','[class*="comment"]',
+    '[id*="sidebar"]','[id*="related"]','[id*="comments"]',
+    '[class*="ad-"]','[id*="ad-"]','[class*="advertisement"]',
+    '[aria-label="advertisement"]','.widget','#widget',
+  ];
+  noiseSelectors.forEach(sel => {
+    try { doc.querySelectorAll(sel).forEach(el => el.remove()); } catch {}
+  });
+
+  // Try content selectors in priority order
+  const contentSelectors = [
+    'article [class*="body"]',
+    'article [class*="content"]',
+    'article',
+    '[role="main"] [class*="body"]',
+    '[role="main"] [class*="content"]',
+    '[role="main"]',
+    'main [class*="article"]',
+    'main [class*="content"]',
+    'main',
+    '[class*="article-body"]',
+    '[class*="article-content"]',
+    '[class*="post-content"]',
+    '[class*="entry-content"]',
+    '[class*="story-body"]',
+    '[class*="body-text"]',
+    '[itemprop="articleBody"]',
+    '#content',
+    '.content',
+  ];
+
+  let content = null;
+  for (const sel of contentSelectors) {
+    try {
+      const el = doc.querySelector(sel);
+      if (el && el.textContent.trim().length > 300) { content = el; break; }
+    } catch {}
+  }
+
+  if (!content) content = doc.body;
+
+  // Fix relative URLs
+  content.querySelectorAll('img[src]').forEach(img => {
+    try {
+      const src = img.getAttribute('src');
+      if (src && !src.startsWith('http') && !src.startsWith('data:'))
+        img.setAttribute('src', new URL(src, baseUrl).href);
+    } catch {}
+    img.removeAttribute('srcset'); // avoid cross-origin srcset issues
+    img.style.maxWidth = '100%';
+  });
+
+  content.querySelectorAll('a[href]').forEach(a => {
+    try {
+      const href = a.getAttribute('href');
+      if (href && !href.startsWith('http') && !href.startsWith('#') && !href.startsWith('mailto:'))
+        a.setAttribute('href', new URL(href, baseUrl).href);
+    } catch {}
+    a.setAttribute('target', '_blank');
+    a.setAttribute('rel', 'noopener noreferrer');
+  });
+
+  // Strip remaining dangerous attributes
+  content.querySelectorAll('*').forEach(el => {
+    for (const attr of [...el.attributes]) {
+      if (attr.name.startsWith('on') || attr.name === 'style' && attr.value.includes('javascript'))
+        el.removeAttribute(attr.name);
+    }
+  });
+
+  // Remove empty block elements
+  content.querySelectorAll('p,div,section').forEach(el => {
+    if (!el.textContent.trim() && !el.querySelector('img')) el.remove();
+  });
+
+  return content.innerHTML;
+}
+
+// ── Preview / Reader ──
 function openPreview(article) {
   const overlay = document.getElementById('modal-overlay');
   const imgWrap = document.getElementById('modal-img-wrap');
@@ -972,28 +1238,58 @@ function openPreview(article) {
   const date = new Date(article.date);
   const dateStr = isNaN(date.getTime()) ? '' : date.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
 
+  // Image
   if (article.image) {
-    imgWrap.innerHTML = `<img id="modal-img" src="${escapeAttr(article.image)}" alt="" onerror="this.parentNode.innerHTML='<div id=\\'modal-placeholder\\' style=\\'background:${color}22\\'>${initial}</div>'">`;
+    imgWrap.innerHTML = `<img id="modal-img" src="${escapeAttr(article.image)}" alt=""
+      onerror="this.outerHTML='<div id=\\'modal-placeholder\\' style=\\'background:${color}22\\'>${initial}</div>'">`;
   } else {
     imgWrap.innerHTML = `<div id="modal-placeholder" style="background:${color}22">${initial}</div>`;
   }
 
+  // Meta + title + desc
   document.getElementById('modal-meta').innerHTML =
     `<span class="source-dot" style="background:${color}"></span>
      <strong>${escapeHtml(article.sourceName)}</strong>
      ${dateStr ? `<span>·</span><span>${dateStr}</span>` : ''}`;
-
   document.getElementById('modal-title').textContent = article.title;
   document.getElementById('modal-desc').textContent = article.description || '';
   document.getElementById('modal-link').href = article.link || '#';
+  document.getElementById('article-fallback-link').href = article.link || '#';
+
+  // Reader pane reset
+  document.getElementById('reader-toolbar-title').textContent = article.title;
+  document.getElementById('article-loading').style.display = 'flex';
+  document.getElementById('article-content').style.display = 'none';
+  document.getElementById('article-content').innerHTML = '';
+  document.getElementById('article-error').style.display = 'none';
 
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
+
+  // Fetch article content
+  if (article.link) {
+    fetchArticleContent(article.link).then(html => {
+      document.getElementById('article-loading').style.display = 'none';
+      const contentEl = document.getElementById('article-content');
+      contentEl.innerHTML = html;
+      contentEl.style.display = 'block';
+    }).catch(() => {
+      document.getElementById('article-loading').style.display = 'none';
+      document.getElementById('article-error').style.display = 'block';
+    });
+  } else {
+    document.getElementById('article-loading').style.display = 'none';
+    document.getElementById('article-error').style.display = 'block';
+  }
 }
 
 function closePreview() {
   document.getElementById('modal-overlay').classList.remove('open');
   document.body.style.overflow = '';
+  // Clear content to stop any in-progress renders
+  setTimeout(() => {
+    document.getElementById('article-content').innerHTML = '';
+  }, 250);
 }
 
 // ── Settings ──
@@ -1026,7 +1322,7 @@ function renderSourceList() {
         <div class="source-url" title="${escapeAttr(s.url)}">${escapeHtml(s.url)}</div>
       </div>
       <button class="toggle ${s.enabled ? 'on' : ''}" onclick="toggleSource('${s.id}')" title="${s.enabled ? 'Disable' : 'Enable'}"></button>
-      <button class="delete-btn" onclick="deleteSource('${s.id}')" title="Remove source">×</button>
+      <button class="delete-btn" onclick="deleteSource('${s.id}')" title="Remove">×</button>
     </div>`;
   }).join('');
 }
@@ -1038,10 +1334,7 @@ function toggleSource(id) {
   saveSettings();
   renderSourceList();
   renderSourceFilters();
-  // Re-filter articles without fetching
-  if (state.activeFilter === id && !src.enabled) {
-    state.activeFilter = 'all';
-  }
+  if (state.activeFilter === id && !src.enabled) state.activeFilter = 'all';
   renderGrid();
 }
 
@@ -1071,12 +1364,10 @@ function addSource() {
   saveSettings();
   renderSourceList();
   renderSourceFilters();
-
   nameEl.value = '';
   urlEl.value = '';
-  showToast(`Added "${name}" — refreshing…`, 'success');
+  showToast(`Added "${name}" — fetching…`, 'success');
 
-  // Fetch the new source
   fetchFeed(state.sources[state.sources.length - 1]).then(articles => {
     state.articles.push(...articles);
     const seen = new Set();
@@ -1088,9 +1379,7 @@ function addSource() {
     state.articles.sort((a,b) => new Date(b.date) - new Date(a.date));
     cacheArticles(state.articles);
     renderGrid();
-  }).catch(err => {
-    showToast(`Failed to fetch feed: ${err.message}`, 'error');
-  });
+  }).catch(err => showToast(`Failed to fetch feed: ${err.message}`, 'error'));
 }
 
 // ── Auto Refresh ──
@@ -1100,7 +1389,6 @@ function scheduleRefresh() {
 
   const ms = state.refreshInterval * 60 * 1000;
   state.nextRefreshAt = Date.now() + ms;
-
   state.refreshTimer = setTimeout(() => fetchAll(), ms);
 
   state.countdownTimer = setInterval(() => {
@@ -1114,13 +1402,8 @@ function scheduleRefresh() {
 
 function updateRefreshBtn(loading) {
   const btn = document.getElementById('refresh-btn');
-  if (loading) {
-    btn.classList.add('loading');
-    btn.querySelector('svg').style.animation = 'spin 1s linear infinite';
-  } else {
-    btn.classList.remove('loading');
-    btn.querySelector('svg').style.animation = '';
-  }
+  btn.classList.toggle('loading', loading);
+  btn.querySelector('svg').style.animation = loading ? 'spin 1s linear infinite' : '';
 }
 
 // ── Toast ──
@@ -1130,37 +1413,25 @@ function showToast(msg, type = '') {
   el.textContent = msg;
   el.className = `show ${type}`;
   if (toastTimer) clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.classList.remove('show'); }, 3000);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
 }
 
 // ── Utils ──
 function escapeHtml(str) {
   return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;');
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 function escapeAttr(str) {
   return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;');
+    .replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')
+    .replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
-
-// ── Spin animation ──
-const spinStyle = document.createElement('style');
-spinStyle.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
-document.head.appendChild(spinStyle);
 
 // ── Init ──
 function init() {
   loadSettings();
 
-  // Wire settings
   document.getElementById('settings-btn').addEventListener('click', openSettings);
   document.getElementById('refresh-btn').addEventListener('click', () => fetchAll());
   document.getElementById('interval-select').addEventListener('change', e => {
@@ -1170,25 +1441,19 @@ function init() {
     showToast(`Auto-refresh set to ${state.refreshInterval} min`, 'success');
   });
 
-  // Modal close on overlay click
   document.getElementById('modal-overlay').addEventListener('click', e => {
     if (e.target === e.currentTarget) closePreview();
   });
 
-  // Keyboard shortcuts
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      closePreview();
-      closeSettings();
-    }
-    if (e.key === 'r' || e.key === 'R') {
-      if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
-        fetchAll();
-      }
+    if (e.key === 'Escape') { closePreview(); closeSettings(); }
+    if ((e.key === 'r' || e.key === 'R') &&
+        document.activeElement.tagName !== 'INPUT' &&
+        document.activeElement.tagName !== 'TEXTAREA') {
+      fetchAll();
     }
   });
 
-  // Load cached articles immediately
   const cached = loadCachedArticles();
   if (cached.length) {
     state.articles = cached.map(a => ({ ...a, date: new Date(a.date) }));
@@ -1199,7 +1464,6 @@ function init() {
     showSkeletons(12);
   }
 
-  // Fetch fresh data
   fetchAll();
 }
 
