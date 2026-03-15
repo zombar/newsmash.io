@@ -250,79 +250,6 @@ body {
 }
 #empty-state h2 { font-size: 20px; margin-bottom: 8px; color: var(--text); }
 
-/* ── Preview Modal ── */
-#modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: var(--overlay);
-  z-index: 200;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-}
-#modal-overlay.open { display: flex; }
-
-#modal {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 0;
-  max-width: 660px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-  animation: modal-in 0.18s ease;
-}
-@keyframes modal-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: none; }
-}
-
-#modal-img {
-  width: 100%;
-  aspect-ratio: 16/9;
-  object-fit: cover;
-  display: block;
-}
-#modal-placeholder {
-  width: 100%;
-  aspect-ratio: 16/9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 72px;
-  font-weight: 700;
-  color: rgba(0,0,0,0.12);
-}
-
-#modal-body { padding: 20px; }
-
-#modal-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 10px;
-}
-
-#modal-title {
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.3;
-  margin-bottom: 10px;
-}
-
-#modal-desc {
-  color: var(--text-muted);
-  line-height: 1.7;
-  margin-bottom: 20px;
-  font-size: 14px;
-}
-
-#modal-actions { display: flex; gap: 8px; }
 
 .btn {
   padding: 8px 16px;
@@ -542,21 +469,6 @@ select.input {
   <div id="grid"></div>
 </main>
 
-<!-- Preview Modal -->
-<div id="modal-overlay">
-  <div id="modal">
-    <div id="modal-img-wrap"></div>
-    <div id="modal-body">
-      <div id="modal-meta"></div>
-      <div id="modal-title"></div>
-      <div id="modal-desc"></div>
-      <div id="modal-actions">
-        <a id="modal-link" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Read Full Article →</a>
-        <button class="btn btn-secondary" onclick="closePreview()">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- Settings Drawer -->
 <div id="settings-overlay" onclick="closeSettings()"></div>
@@ -874,7 +786,7 @@ function renderCard(article) {
       + `<div class="card-placeholder" style="display:none;background:${color}18">${initial}</div>`
     : `<div class="card-placeholder" style="background:${color}18">${initial}</div>`;
 
-  return `<article class="card" onclick='openPreview(${JSON.stringify(article).replace(/</g,'\\u003c')})'>
+  return `<a class="card" href="${escapeAttr(article.link)}" target="_blank" rel="noopener noreferrer">
     ${imgHtml}
     <div class="card-body">
       <div class="card-meta">
@@ -886,7 +798,7 @@ function renderCard(article) {
       <div class="card-title">${escapeHtml(article.title)}</div>
       ${article.description ? `<div class="card-desc">${escapeHtml(article.description)}</div>` : ''}
     </div>
-  </article>`;
+  </a>`;
 }
 
 function showSkeletons(count) {
@@ -919,35 +831,6 @@ function setFilter(id) {
   renderGrid();
 }
 
-// ── Preview ──
-function openPreview(article) {
-  const color = sourceColor(article.sourceId);
-  const initial = article.sourceName.charAt(0).toUpperCase();
-  const date = new Date(article.date);
-  const dateStr = isNaN(date.getTime()) ? '' : date.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
-
-  document.getElementById('modal-img-wrap').innerHTML = article.image
-    ? `<img id="modal-img" src="${escapeAttr(article.image)}" alt=""
-        onerror="this.outerHTML='<div id=\\'modal-placeholder\\' style=\\'background:${color}18\\'>${initial}</div>'">`
-    : `<div id="modal-placeholder" style="background:${color}18">${initial}</div>`;
-
-  document.getElementById('modal-meta').innerHTML =
-    `<span class="source-dot" style="background:${color}"></span>
-     <strong>${escapeHtml(article.sourceName)}</strong>
-     ${dateStr ? `<span>·</span><span>${dateStr}</span>` : ''}`;
-
-  document.getElementById('modal-title').textContent = article.title;
-  document.getElementById('modal-desc').textContent = article.description || '';
-  document.getElementById('modal-link').href = article.link || '#';
-
-  document.getElementById('modal-overlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closePreview() {
-  document.getElementById('modal-overlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
 
 // ── Settings ──
 function openSettings() {
@@ -1107,11 +990,8 @@ function init() {
     renderGrid();
     showToast(`Keeping articles for ${state.articleMaxAgeDays} day(s)`, 'success');
   });
-  document.getElementById('modal-overlay').addEventListener('click', e => {
-    if (e.target === e.currentTarget) closePreview();
-  });
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closePreview(); closeSettings(); }
+    if (e.key === 'Escape') { closeSettings(); }
     if ((e.key === 'r' || e.key === 'R') &&
         document.activeElement.tagName !== 'INPUT' &&
         document.activeElement.tagName !== 'TEXTAREA') fetchAll();
