@@ -878,15 +878,16 @@ function interleaveArticles(articles) {
   const noImg   = articles.filter(a => !a.image);
   if (!noImg.length)   return withImg;
   if (!withImg.length) return noImg;
-  // Place one text card every `step` image cards for an even spread
-  const step = Math.ceil(withImg.length / (noImg.length + 1));
+  // After each image card, flush text cards up to the proportional target.
+  // This distributes any number of text cards evenly regardless of ratio.
   const result = [];
-  let ni = 0;
+  let ti = 0;
   withImg.forEach((a, i) => {
     result.push(a);
-    if (ni < noImg.length && (i + 1) % step === 0) result.push(noImg[ni++]);
+    const target = Math.round((i + 1) * noImg.length / withImg.length);
+    while (ti < target) result.push(noImg[ti++]);
   });
-  while (ni < noImg.length) result.push(noImg[ni++]);
+  while (ti < noImg.length) result.push(noImg[ti++]);
   return result;
 }
 
