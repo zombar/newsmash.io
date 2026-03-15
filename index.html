@@ -659,7 +659,10 @@ function loadSettings() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const data = JSON.parse(raw);
-      state.sources = data.sources || DEFAULT_SOURCES;
+      const saved = data.sources || [];
+      const savedIds = new Set(saved.map(s => s.id));
+      const newDefaults = DEFAULT_SOURCES.filter(s => !savedIds.has(s.id));
+      state.sources = [...saved, ...newDefaults];
       state.refreshInterval = data.refreshInterval || 5;
       state.articleMaxAgeDays = data.articleMaxAgeDays || 7;
       state.priorityCategories = data.priorityCategories || [];
