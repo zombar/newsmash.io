@@ -834,6 +834,7 @@
     <script>
       const STORAGE_KEY = "newsmash_v1";
       const ARTICLES_KEY = "newsmash_articles_v1";
+      const LAST_FETCH_KEY = "newsmash_last_fetch_v1";
       const CORS_PROXIES = [
         (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
         (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
@@ -1149,6 +1150,7 @@
                   if (errCount > 0 && !state.articles.length) showToast(`Failed to load ${errCount} feed(s).`, "error");
                   else if (errCount > 0) showToast(`${errCount} feed(s) failed`, "error");
                   scheduleRefresh();
+                  localStorage.setItem(LAST_FETCH_KEY, Date.now().toString());
                   startAutoScroll();
                 }
               }),
@@ -1565,7 +1567,14 @@
           showSpinner();
         }
 
-        fetchAll();
+        const lastFetch = parseInt(localStorage.getItem(LAST_FETCH_KEY) || "0");
+        const intervalMs = state.refreshInterval * 60 * 1000;
+        const elapsed = Date.now() - lastFetch;
+        if (lastFetch && elapsed < intervalMs) {
+          state.refreshTimer = setTimeout(() => fetchAll(), intervalMs - elapsed);
+        } else {
+          fetchAll();
+        }
       }
 
       document.addEventListener("DOMContentLoaded", init);
