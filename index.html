@@ -13,12 +13,29 @@
   --border: #d0d7de;
   --text: #1f2328;
   --text-muted: #656d76;
-  --accent: #0969da;
-  --accent-hover: #0550ae;
   --danger: #cf222e;
   --success: #1a7f37;
   --overlay: rgba(0,0,0,0.45);
   --header-h: 56px;
+  --ink: #000;
+  --ink-inv: #fff;
+  --shimmer-a: #f0f2f4;
+  --shimmer-b: #e8ebee;
+  --header-bg: rgba(255,255,255,0.93);
+}
+
+html.dark {
+  --bg: #0d1117;
+  --card: #161b22;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-muted: #8b949e;
+  --overlay: rgba(0,0,0,0.7);
+  --ink: #fff;
+  --ink-inv: #000;
+  --shimmer-a: #161b22;
+  --shimmer-b: #21262d;
+  --header-bg: rgba(13,17,23,0.92);
 }
 
 body {
@@ -35,7 +52,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(255,255,255,0.93);
+  background: var(--header-bg);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
   height: var(--header-h);
@@ -49,7 +66,7 @@ body {
   font-family: Impact, 'Arial Narrow', Arial, sans-serif;
   font-size: 22px;
   font-weight: 400;
-  color: #000;
+  color: var(--ink);
   letter-spacing: 1px;
   white-space: nowrap;
   flex-shrink: 0;
@@ -80,7 +97,7 @@ body {
   white-space: nowrap;
 }
 .chip:hover { border-color: var(--accent); color: var(--text); }
-.chip.active { background: #000; border-color: #000; color: #fff; font-weight: 600; }
+.chip.active { background: var(--ink); border-color: var(--ink); color: var(--ink-inv); font-weight: 600; }
 
 #header-right {
   display: flex;
@@ -89,13 +106,6 @@ body {
   flex-shrink: 0;
 }
 
-#refresh-countdown {
-  font-size: 12px;
-  color: var(--text-muted);
-  white-space: nowrap;
-  min-width: 50px;
-  text-align: right;
-}
 
 .icon-btn {
   background: var(--bg);
@@ -111,7 +121,7 @@ body {
   align-items: center;
   gap: 6px;
 }
-.icon-btn:hover { border-color: #000; color: #000; }
+.icon-btn:hover { border-color: var(--ink); color: var(--ink); }
 .icon-btn.loading { opacity: 0.4; pointer-events: none; }
 .icon-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
@@ -137,7 +147,7 @@ body {
 }
 .card:hover {
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-  border-color: #000;
+  border-color: var(--ink);
 }
 
 .card-img {
@@ -157,7 +167,7 @@ body {
   justify-content: center;
   font-size: 48px;
   font-weight: 700;
-  color: rgba(0,0,0,0.15);
+  color: rgba(128,128,128,0.25);
   flex-shrink: 0;
 }
 
@@ -213,7 +223,7 @@ body {
 }
 
 .shimmer {
-  background: linear-gradient(90deg, #f0f2f4 0%, #e8ebee 50%, #f0f2f4 100%);
+  background: linear-gradient(90deg, var(--shimmer-a) 0%, var(--shimmer-b) 50%, var(--shimmer-a) 100%);
   background-size: 400% 100%;
   animation: shimmer 2.5s ease-in-out infinite;
 }
@@ -225,7 +235,7 @@ body {
 
 .skel-img { width: 100%; aspect-ratio: 16/9; }
 .skel-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-.skel-line { height: 11px; border-radius: 0; background: #e8ebee; }
+.skel-line { height: 11px; border-radius: 0; background: var(--shimmer-b); }
 .skel-line.short { width: 55%; }
 .skel-line.medium { width: 80%; }
 .skel-line.long { width: 100%; }
@@ -325,10 +335,10 @@ body {
   text-decoration: none;
   display: inline-block;
 }
-.btn-primary { background: #000; border-color: #000; color: #fff; }
-.btn-primary:hover { background: #333; border-color: #333; }
+.btn-primary { background: var(--ink); border-color: var(--ink); color: var(--ink-inv); }
+.btn-primary:hover { opacity: 0.85; }
 .btn-secondary { background: transparent; color: var(--text); }
-.btn-secondary:hover { border-color: #000; }
+.btn-secondary:hover { border-color: var(--ink); }
 
 /* ── Settings Drawer ── */
 #settings-overlay {
@@ -431,7 +441,7 @@ body {
   left: 3px;
   transition: left 0.2s;
 }
-.toggle.on { background: #000; }
+.toggle.on { background: var(--ink); }
 .toggle.on::after { left: 19px; }
 
 .delete-btn {
@@ -459,7 +469,7 @@ body {
   width: 100%;
   transition: border-color 0.15s;
 }
-.input:focus { outline: none; border-color: #000; }
+.input:focus { outline: none; border-color: var(--ink); }
 .input::placeholder { color: var(--text-muted); }
 
 .input-row { display: flex; gap: 8px; }
@@ -514,7 +524,10 @@ select.input {
   <div id="logo">NEWSMASH.IO</div>
   <div id="filter-bar"></div>
   <div id="header-right">
-    <span id="refresh-countdown"></span>
+    <button class="icon-btn" id="theme-btn" title="Toggle theme">
+      <svg id="theme-icon-sun" viewBox="0 0 24 24" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg id="theme-icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
     <button class="icon-btn" id="refresh-btn" title="Refresh (R)">
       <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
     </button>
@@ -611,8 +624,6 @@ const state = {
   activeFilter: 'all',
   refreshInterval: 5,
   refreshTimer: null,
-  countdownTimer: null,
-  nextRefreshAt: null,
   loading: false,
 };
 
@@ -991,18 +1002,30 @@ function addSource() {
   }).catch(err => showToast(`Failed to fetch: ${err.message}`, 'error'));
 }
 
+// ── Theme ──
+function initTheme() {
+  const saved = localStorage.getItem('newsmash_theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const dark = saved ? saved === 'dark' : prefersDark;
+  setTheme(dark, false);
+}
+
+function setTheme(dark, save = true) {
+  document.documentElement.classList.toggle('dark', dark);
+  document.getElementById('theme-icon-sun').style.display  = dark  ? '' : 'none';
+  document.getElementById('theme-icon-moon').style.display = dark  ? 'none' : '';
+  if (save) localStorage.setItem('newsmash_theme', dark ? 'dark' : 'light');
+}
+
+function toggleTheme() {
+  setTheme(!document.documentElement.classList.contains('dark'));
+}
+
 // ── Auto Refresh ──
 function scheduleRefresh() {
-  if (state.refreshTimer)   clearTimeout(state.refreshTimer);
-  if (state.countdownTimer) clearInterval(state.countdownTimer);
+  if (state.refreshTimer) clearTimeout(state.refreshTimer);
   const ms = state.refreshInterval * 60 * 1000;
-  state.nextRefreshAt = Date.now() + ms;
   state.refreshTimer = setTimeout(() => fetchAll(), ms);
-  state.countdownTimer = setInterval(() => {
-    const r = Math.max(0, state.nextRefreshAt - Date.now());
-    const m = Math.floor(r / 60000), s = Math.floor((r % 60000) / 1000);
-    document.getElementById('refresh-countdown').textContent = r > 0 ? `${m}:${String(s).padStart(2,'0')}` : '';
-  }, 1000);
 }
 
 function updateRefreshBtn(loading) {
@@ -1032,7 +1055,9 @@ function escapeAttr(s) {
 // ── Init ──
 function init() {
   loadSettings();
+  initTheme();
 
+  document.getElementById('theme-btn').addEventListener('click', toggleTheme);
   document.getElementById('settings-btn').addEventListener('click', openSettings);
   document.getElementById('refresh-btn').addEventListener('click', () => fetchAll());
   document.getElementById('interval-select').addEventListener('change', e => {
