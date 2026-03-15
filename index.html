@@ -158,6 +158,11 @@ body {
   height: 18px;
   background: #1a7f37 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E") no-repeat center / 12px;
 }
+.card--compact {
+  align-self: start;
+}
+.card--compact .card-title { -webkit-line-clamp: 4; }
+
 .card:hover {
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
   border-color: var(--ink);
@@ -446,6 +451,15 @@ select.input {
 #interval-row { display: flex; align-items: center; gap: 12px; }
 #interval-row label { font-size: 13px; white-space: nowrap; }
 
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.setting-row label { font-size: 13px; }
+
 /* ── Toast ── */
 #toast {
   position: fixed;
@@ -512,6 +526,23 @@ select.input {
   </div>
   <div id="settings-body">
     <div class="settings-section">
+      <h3>Auto-scroll</h3>
+      <div class="setting-row">
+        <label>Enable auto-scroll</label>
+        <button class="toggle" id="autoscroll-toggle" onclick="toggleAutoScroll()"></button>
+      </div>
+      <div class="setting-row" id="autoscroll-resume-row">
+        <label for="resume-select">Resume after inactivity</label>
+        <select class="input" id="resume-select" style="width:auto">
+          <option value="5">5 sec</option>
+          <option value="10" selected>10 sec</option>
+          <option value="20">20 sec</option>
+          <option value="30">30 sec</option>
+          <option value="60">1 min</option>
+        </select>
+      </div>
+    </div>
+    <div class="settings-section">
       <h3>Auto Refresh</h3>
       <div id="interval-row">
         <label for="interval-select">Refresh every</label>
@@ -573,12 +604,12 @@ const SOURCE_COLORS = [
 ];
 
 const CATEGORIES = [
-  { id: 'tech',          label: 'Tech',          keywords: ['technology','software','ai','artificial intelligence','startup','coding','programming','developer','cybersecurity','machine learning','robot','quantum','chip','semiconductor','microsoft','google','apple','meta','openai','app','api','cloud','hardware'] },
-  { id: 'science',       label: 'Science',        keywords: ['science','research','study','climate','space','nasa','biology','physics','chemistry','environment','species','genome','discovery','experiment','cosmic','astronomy','vaccine','medical'] },
-  { id: 'sport',         label: 'Sport',          keywords: ['sport','football','soccer','basketball','tennis','cricket','rugby','baseball','olympics','athlete','tournament','championship','league','match','goal','score','transfer','grand prix','formula 1','f1','cycling','swimming'] },
-  { id: 'business',      label: 'Business',       keywords: ['business','economy','market','stock','finance','investment','bank','trade','inflation','recession','gdp','revenue','profit','merger','acquisition','ipo','venture','hedge fund','crypto','bitcoin'] },
-  { id: 'world',         label: 'World',          keywords: ['politics','election','government','war','conflict','military','president','minister','parliament','treaty','diplomacy','sanctions','nato','united nations','refugee','protest','coup'] },
-  { id: 'entertainment', label: 'Entertainment',  keywords: ['film','movie','music','album','celebrity','award','oscar','grammy','tv','series','streaming','netflix','disney','box office','concert','theatre','gaming','video game'] },
+  { id: 'tech',          label: 'Tech',          keywords: ['artificial intelligence','machine learning','cybersecurity','semiconductor','open source','programming','developer','startup','quantum computing','robotics','autonomous','smartphone','nvidia','microsoft','openai','github','data breach','silicon valley','big tech','algorithm','blockchain','iphone','android','software engineer','tech company'] },
+  { id: 'science',       label: 'Science',        keywords: ['climate change','space mission','nasa','biology','physics','chemistry','genome','vaccine','clinical trial','fossil','evolution','planet','asteroid','telescope','neuroscience','scientific','ecology','biodiversity','renewable energy','gene','particle','species extinction'] },
+  { id: 'sport',         label: 'Sport',          keywords: ['football','soccer','basketball','tennis','cricket','rugby','baseball','olympics','athlete','tournament','championship','transfer','grand prix','formula 1','cycling','swimming','premier league','world cup','playoff','quarterback','goalkeeper','esports','match result','sporting'] },
+  { id: 'business',      label: 'Business',       keywords: ['stock market','interest rate','hedge fund','venture capital','inflation','recession','gdp','merger','acquisition','ipo','cryptocurrency','central bank','federal reserve','wall street','earnings','dividend','trade war','supply chain','fiscal','monetary policy','private equity'] },
+  { id: 'world',         label: 'World',          keywords: ['election','geopolitical','military','nato','united nations','sanctions','diplomat','refugee','ceasefire','president','prime minister','parliament','coup','revolution','foreign policy','treaty','warfare','armed forces','insurgent','humanitarian'] },
+  { id: 'entertainment', label: 'Entertainment',  keywords: ['box office','oscar','grammy','emmy','bafta','celebrity','blockbuster','netflix','disney','concert','album release','video game','gaming','film festival','movie review','sitcom','pop star','chart-topping','streaming service','award ceremony'] },
 ];
 
 const DEFAULT_SOURCES = [
@@ -597,6 +628,8 @@ const state = {
   priorityCategories: [],
   refreshInterval: 5,
   articleMaxAgeDays: 7,
+  autoScrollEnabled: true,
+  autoScrollResumeDelay: 10,
   refreshTimer: null,
   loading: false,
 };
@@ -611,6 +644,8 @@ function loadSettings() {
       state.refreshInterval = data.refreshInterval || 5;
       state.articleMaxAgeDays = data.articleMaxAgeDays || 7;
       state.priorityCategories = data.priorityCategories || [];
+      state.autoScrollEnabled = data.autoScrollEnabled !== false;
+      state.autoScrollResumeDelay = data.autoScrollResumeDelay ?? 10;
     } else {
       state.sources = DEFAULT_SOURCES.map(s => ({ ...s }));
     }
@@ -625,6 +660,8 @@ function saveSettings() {
     refreshInterval: state.refreshInterval,
     articleMaxAgeDays: state.articleMaxAgeDays,
     priorityCategories: state.priorityCategories,
+    autoScrollEnabled: state.autoScrollEnabled,
+    autoScrollResumeDelay: state.autoScrollResumeDelay,
   }));
 }
 
@@ -816,7 +853,14 @@ function articleMatchesCategories(article, catIds) {
   const haystack = (article.title + ' ' + article.description).toLowerCase();
   return catIds.some(cid => {
     const cat = CATEGORIES.find(c => c.id === cid);
-    return cat && cat.keywords.some(kw => haystack.includes(kw));
+    return cat && cat.keywords.some(kw => {
+      const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // phrases: substring match; single words: require word boundary
+      const re = /\s/.test(kw)
+        ? new RegExp(escaped, 'i')
+        : new RegExp('\\b' + escaped + '\\b', 'i');
+      return re.test(haystack);
+    });
   });
 }
 
@@ -844,13 +888,13 @@ function renderGrid() {
 
 function renderCard(article) {
   const color = sourceColor(article.sourceId);
-  const initial = article.sourceName.charAt(0).toUpperCase();
+  const compact = !article.image;
   const imgHtml = article.image
-    ? `<img class="card-img" src="${escapeAttr(article.image)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-      + `<div class="card-placeholder" style="display:none;background:${color}18">${initial}</div>`
-    : `<div class="card-placeholder" style="background:${color}18">${initial}</div>`;
+    ? `<img class="card-img" src="${escapeAttr(article.image)}" alt="" loading="lazy" onerror="this.style.display='none'">`
+    : '';
+  const accentStyle = compact ? `border-top: 3px solid ${color}` : '';
 
-  return `<a class="card" href="${escapeAttr(article.link)}" target="_blank" rel="noopener noreferrer">
+  return `<a class="card${compact ? ' card--compact' : ''}" href="${escapeAttr(article.link)}" target="_blank" rel="noopener noreferrer" style="${accentStyle}">
     ${imgHtml}
     <div class="card-body">
       <div class="card-meta">
@@ -903,8 +947,22 @@ function openSettings() {
   document.body.style.overflow = 'hidden';
   document.getElementById('interval-select').value = String(state.refreshInterval);
   document.getElementById('retention-select').value = String(state.articleMaxAgeDays);
+  document.getElementById('resume-select').value = String(state.autoScrollResumeDelay);
+  const toggle = document.getElementById('autoscroll-toggle');
+  toggle.classList.toggle('on', state.autoScrollEnabled);
+  document.getElementById('autoscroll-resume-row').style.opacity = state.autoScrollEnabled ? '1' : '0.4';
   renderCategoryChips();
   renderSourceList();
+}
+
+function toggleAutoScroll() {
+  state.autoScrollEnabled = !state.autoScrollEnabled;
+  saveSettings();
+  const toggle = document.getElementById('autoscroll-toggle');
+  toggle.classList.toggle('on', state.autoScrollEnabled);
+  document.getElementById('autoscroll-resume-row').style.opacity = state.autoScrollEnabled ? '1' : '0.4';
+  if (state.autoScrollEnabled) startAutoScroll();
+  else { if (autoScrollRaf) { cancelAnimationFrame(autoScrollRaf); autoScrollRaf = null; } if (autoScrollResumeTimer) { clearTimeout(autoScrollResumeTimer); autoScrollResumeTimer = null; } }
 }
 
 function renderCategoryChips() {
@@ -1025,17 +1083,18 @@ function scheduleRefresh() {
 
 // ── Autoscroll ──
 let autoScrollRaf = null;
-let autoScrollCancelled = false;
+let autoScrollResumeTimer = null;
 
 function startAutoScroll() {
+  if (!state.autoScrollEnabled) return;
   if (autoScrollRaf) cancelAnimationFrame(autoScrollRaf);
-  autoScrollCancelled = false;
+  if (autoScrollResumeTimer) { clearTimeout(autoScrollResumeTimer); autoScrollResumeTimer = null; }
 
-  // Small delay so the grid has painted
   setTimeout(() => {
-    const speed = 0.6; // px per frame
+    if (!state.autoScrollEnabled) return;
+    const speed = 0.6;
     function step() {
-      if (autoScrollCancelled) return;
+      if (!state.autoScrollEnabled) return;
       const maxY = document.documentElement.scrollHeight - window.innerHeight;
       if (window.scrollY >= maxY) return;
       window.scrollBy(0, speed);
@@ -1045,9 +1104,12 @@ function startAutoScroll() {
   }, 250);
 }
 
-function cancelAutoScroll() {
-  autoScrollCancelled = true;
+function pauseAutoScroll() {
   if (autoScrollRaf) { cancelAnimationFrame(autoScrollRaf); autoScrollRaf = null; }
+  if (autoScrollResumeTimer) clearTimeout(autoScrollResumeTimer);
+  if (state.autoScrollEnabled && state.autoScrollResumeDelay > 0) {
+    autoScrollResumeTimer = setTimeout(startAutoScroll, state.autoScrollResumeDelay * 1000);
+  }
 }
 
 function updateRefreshBtn(loading) {
@@ -1088,6 +1150,10 @@ function init() {
     scheduleRefresh();
     showToast(`Auto-refresh set to ${state.refreshInterval} min`, 'success');
   });
+  document.getElementById('resume-select').addEventListener('change', e => {
+    state.autoScrollResumeDelay = parseInt(e.target.value, 10);
+    saveSettings();
+  });
   document.getElementById('retention-select').addEventListener('change', e => {
     state.articleMaxAgeDays = parseInt(e.target.value, 10);
     saveSettings();
@@ -1099,9 +1165,9 @@ function init() {
     showToast(`Keeping articles for ${state.articleMaxAgeDays} day(s)`, 'success');
   });
   // Cancel autoscroll on any user scroll or key interaction
-  window.addEventListener('wheel',     cancelAutoScroll, { passive: true });
-  window.addEventListener('touchmove', cancelAutoScroll, { passive: true });
-  window.addEventListener('keydown',   cancelAutoScroll, { passive: true });
+  window.addEventListener('wheel',     pauseAutoScroll, { passive: true });
+  window.addEventListener('touchmove', pauseAutoScroll, { passive: true });
+  window.addEventListener('keydown',   pauseAutoScroll, { passive: true });
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') { closeSettings(); }
