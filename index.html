@@ -213,12 +213,6 @@ body {
   color: var(--text-muted);
 }
 
-.source-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
 
 .card-title {
   font-size: 14px;
@@ -382,12 +376,6 @@ body {
   margin-bottom: 8px;
 }
 
-.source-dot-large {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
 
 .source-info { flex: 1; min-width: 0; }
 .source-name { font-size: 13px; font-weight: 500; }
@@ -608,10 +596,6 @@ const CORS_PROXIES = [
   u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
 ];
 
-const SOURCE_COLORS = [
-  '#0969da','#1a7f37','#9a6700','#cf222e','#8250df',
-  '#0550ae','#116329','#633c01','#a40e26','#6e40c9'
-];
 
 // Maps lowercase RSS <category> terms to our category IDs
 const FEED_CATEGORY_MAP = {
@@ -735,11 +719,6 @@ function cacheArticles(articles) {
   try { localStorage.setItem(ARTICLES_KEY, JSON.stringify(articles.slice(0, 200))); } catch {}
 }
 
-// ── Colors ──
-function sourceColor(sourceId) {
-  const idx = state.sources.findIndex(s => s.id === sourceId);
-  return SOURCE_COLORS[(idx < 0 ? 0 : idx) % SOURCE_COLORS.length];
-}
 
 // ── RSS Parsing ──
 async function fetchFeed(source) {
@@ -980,17 +959,15 @@ function renderGrid() {
 }
 
 function renderCard(article) {
-  const color = sourceColor(article.sourceId);
   const compact = !article.image;
   const imgHtml = article.image
     ? `<img class="card-img" src="${escapeAttr(article.image)}" alt="" loading="lazy" onerror="this.style.display='none'">`
     : '';
 
-  return `<a class="card${compact ? ' card--compact' : ''}" href="${escapeAttr(article.link)}" target="_blank" rel="noopener noreferrer" style="border-top: 3px solid ${color}">
+  return `<a class="card${compact ? ' card--compact' : ''}" href="${escapeAttr(article.link)}" target="_blank" rel="noopener noreferrer">
     ${imgHtml}
     <div class="card-body">
       <div class="card-meta">
-        <span class="source-dot" style="background:${color}"></span>
         <span>${escapeHtml(article.sourceName)}</span>
         <span>·</span>
         <span>${timeAgo(new Date(article.date))}</span>
@@ -1085,11 +1062,9 @@ function renderSourceList() {
     return;
   }
   const defaultIds = new Set(DEFAULT_SOURCES.map(s => s.id));
-  list.innerHTML = state.sources.map((s, i) => {
-    const color = SOURCE_COLORS[i % SOURCE_COLORS.length];
+  list.innerHTML = state.sources.map((s) => {
     const deleteBtn = defaultIds.has(s.id) ? '' : `<button class="delete-btn" onclick="deleteSource('${s.id}')" title="Remove">×</button>`;
     return `<div class="source-item">
-      <span class="source-dot-large" style="background:${color}"></span>
       <div class="source-info">
         <div class="source-name">${escapeHtml(s.name)}</div>
         <div class="source-url" title="${escapeAttr(s.url)}">${escapeHtml(s.url)}</div>
