@@ -537,19 +537,20 @@
         position: fixed;
         bottom: 110px;
         left: 50%;
-        transform: translateX(-50%) translateY(120px);
+        transform: translateX(-50%);
+        opacity: 0;
         background: var(--bg);
         border: 1px solid var(--border);
         border-radius: 0;
         padding: 10px 20px;
         font-size: 13px;
         z-index: 500;
-        transition: transform 0.3s ease;
+        transition: opacity 0.25s ease;
         pointer-events: none;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
       }
       #toast.show {
-        transform: translateX(-50%) translateY(0);
+        opacity: 1;
       }
       #toast.error {
         border-color: var(--danger);
@@ -1081,7 +1082,8 @@
       }
 
       function filteredArticles() {
-        let list = state.articles;
+        const enabledIds = new Set(state.sources.filter((s) => s.enabled).map((s) => s.id));
+        let list = state.articles.filter((a) => enabledIds.has(a.sourceId));
 
         if (state.searchQuery) {
           const q = state.searchQuery.toLowerCase();
