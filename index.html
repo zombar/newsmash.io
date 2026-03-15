@@ -579,6 +579,16 @@ select.input {
           <option value="60">60 min</option>
         </select>
       </div>
+      <div id="interval-row" style="margin-top:10px">
+        <label for="retention-select">Keep articles for</label>
+        <select class="input" id="retention-select" style="width:auto">
+          <option value="1">1 day</option>
+          <option value="3">3 days</option>
+          <option value="7" selected>7 days</option>
+          <option value="14">14 days</option>
+          <option value="30">30 days</option>
+        </select>
+      </div>
     </div>
     <div class="settings-section">
       <h3>Sources</h3>
@@ -627,6 +637,7 @@ const state = {
   articles: [],
   activeFilter: 'all',
   refreshInterval: 5,
+  articleMaxAgeDays: 7,
   refreshTimer: null,
   loading: false,
 };
@@ -639,6 +650,7 @@ function loadSettings() {
       const data = JSON.parse(raw);
       state.sources = data.sources || DEFAULT_SOURCES;
       state.refreshInterval = data.refreshInterval || 5;
+      state.articleMaxAgeDays = data.articleMaxAgeDays || 7;
     } else {
       state.sources = DEFAULT_SOURCES.map(s => ({ ...s }));
     }
@@ -651,6 +663,7 @@ function saveSettings() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     sources: state.sources,
     refreshInterval: state.refreshInterval,
+    articleMaxAgeDays: state.articleMaxAgeDays,
   }));
 }
 
@@ -792,25 +805,30 @@ async function fetchAll() {
     return;
   }
 
-  showSkeletons(enabled.length * 4);
+  if (!state.articles.length) showSkeletons(enabled.length * 4);
+
   const results = await Promise.allSettled(enabled.map(s => fetchFeed(s)));
 
-  const articles = [];
+  const incoming = [];
   let errCount = 0;
   results.forEach((r, i) => {
-    if (r.status === 'fulfilled') articles.push(...r.value);
+    if (r.status === 'fulfilled') incoming.push(...r.value);
     else { errCount++; console.warn(`Feed error [${enabled[i].name}]:`, r.reason); }
   });
 
-  if (errCount > 0 && !articles.length) showToast(`Failed to load ${errCount} feed(s).`, 'error');
+  if (errCount > 0 && !incoming.length && !state.articles.length) showToast(`Failed to load ${errCount} feed(s).`, 'error');
   else if (errCount > 0) showToast(`${errCount} feed(s) failed`, 'error');
 
+  // Merge incoming with existing, deduplicate, expire, sort
+  const cutoff = Date.now() - state.articleMaxAgeDays * 86400000;
   const seen = new Set();
-  const unique = articles.filter(a => { if (seen.has(a.id)) return false; seen.add(a.id); return true; });
-  unique.sort((a,b) => b.date - a.date);
+  const merged = [...incoming, ...state.articles]
+    .filter(a => { if (seen.has(a.id)) return false; seen.add(a.id); return true; })
+    .filter(a => new Date(a.date).getTime() > cutoff)
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-  state.articles = unique;
-  cacheArticles(unique);
+  state.articles = merged;
+  cacheArticles(merged);
   state.loading = false;
   updateRefreshBtn(false);
   renderGrid();
@@ -936,6 +954,7 @@ function openSettings() {
   document.getElementById('settings-drawer').classList.add('open');
   document.body.style.overflow = 'hidden';
   document.getElementById('interval-select').value = String(state.refreshInterval);
+  document.getElementById('retention-select').value = String(state.articleMaxAgeDays);
   renderSourceList();
 }
 
@@ -1076,6 +1095,16 @@ function init() {
     saveSettings();
     scheduleRefresh();
     showToast(`Auto-refresh set to ${state.refreshInterval} min`, 'success');
+  });
+  document.getElementById('retention-select').addEventListener('change', e => {
+    state.articleMaxAgeDays = parseInt(e.target.value, 10);
+    saveSettings();
+    // Re-apply expiry immediately
+    const cutoff = Date.now() - state.articleMaxAgeDays * 86400000;
+    state.articles = state.articles.filter(a => new Date(a.date).getTime() > cutoff);
+    cacheArticles(state.articles);
+    renderGrid();
+    showToast(`Keeping articles for ${state.articleMaxAgeDays} day(s)`, 'success');
   });
   document.getElementById('modal-overlay').addEventListener('click', e => {
     if (e.target === e.currentTarget) closePreview();
