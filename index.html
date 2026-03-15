@@ -1035,8 +1035,10 @@ function renderSourceList() {
     list.innerHTML = '<p style="color:var(--text-muted);font-size:13px">No sources configured.</p>';
     return;
   }
+  const defaultIds = new Set(DEFAULT_SOURCES.map(s => s.id));
   list.innerHTML = state.sources.map((s, i) => {
     const color = SOURCE_COLORS[i % SOURCE_COLORS.length];
+    const deleteBtn = defaultIds.has(s.id) ? '' : `<button class="delete-btn" onclick="deleteSource('${s.id}')" title="Remove">×</button>`;
     return `<div class="source-item">
       <span class="source-dot-large" style="background:${color}"></span>
       <div class="source-info">
@@ -1044,7 +1046,7 @@ function renderSourceList() {
         <div class="source-url" title="${escapeAttr(s.url)}">${escapeHtml(s.url)}</div>
       </div>
       <button class="toggle ${s.enabled ? 'on' : ''}" onclick="toggleSource('${s.id}')"></button>
-      <button class="delete-btn" onclick="deleteSource('${s.id}')" title="Remove">×</button>
+      ${deleteBtn}
     </div>`;
   }).join('');
 }
