@@ -1449,12 +1449,11 @@
 
         setTimeout(() => {
           if (!state.autoScrollEnabled) return;
-          const speed = state.autoScrollSpeed;
           function step() {
             if (!state.autoScrollEnabled) return;
             const maxY = document.documentElement.scrollHeight - window.innerHeight;
             if (window.scrollY >= maxY) return;
-            window.scrollBy(0, speed);
+            window.scrollBy(0, state.autoScrollSpeed);
             autoScrollRaf = requestAnimationFrame(step);
           }
           autoScrollRaf = requestAnimationFrame(step);
